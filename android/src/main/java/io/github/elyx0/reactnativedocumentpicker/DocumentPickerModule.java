@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import com.classtinginc.file_picker.consts.Extra;
 import com.classtinginc.file_picker.model.File;
 import com.classtinginc.file_picker.FilePicker;
 import com.google.gson.Gson;
+import android.webkit.MimeTypeMap;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -138,7 +140,6 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 
 			try {
 				WritableArray results = Arguments.createArray();
-				
 				if (data != null && data.hasExtra(Extra.DATA)) {
 					File[] array = new Gson().fromJson(data.getStringExtra(Extra.DATA), File[].class);
 					for (int i = 0; i < array.length; i++) {
@@ -160,11 +161,25 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 	private WritableMap getMetadata(File file) {
 		WritableMap map = Arguments.createMap();
 
-		map.putString(FIELD_URI, file.getUrl());
-		map.putString(FIELD_TYPE, getExtension(file.getUrl()));
+		String uri = "file://" + file.getUrl();
+		map.putString(FIELD_URI, uri);
+		map.putString(FIELD_TYPE, getMimeType(getCurrentActivity(), Uri.parse(uri)));
 		map.putString(FIELD_NAME, file.getName());
 		map.putDouble(FIELD_SIZE, file.getSize());
 		return map;
+	}
+
+	public String getMimeType(Context context, Uri uri) {
+		String mimeType = null;
+		if (uri.getScheme() != null && uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+			ContentResolver cr = context.getContentResolver();
+			mimeType = cr.getType(uri);
+		} else {
+			String fileExtension = getExtension(uri.toString());
+			mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+							fileExtension.toLowerCase());
+		}
+		return mimeType;
 	}
 
 	public String getExtension(String uri) {
