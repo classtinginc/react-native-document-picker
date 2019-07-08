@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
-import android.util.Log;
 import com.classtinginc.file_picker.consts.Extra;
 import com.classtinginc.file_picker.model.File;
 import com.classtinginc.file_picker.FilePicker;
@@ -105,37 +104,9 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 		this.promise = promise;
 
 		try {
-			// Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-			// intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-			// intent.setType("*/*");
-			// if (!args.isNull(OPTION_TYPE)) {
-			// 	ReadableArray types = args.getArray(OPTION_TYPE);
-			// 	if (types.size() > 1) {
-			// 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			// 			String[] mimeTypes = readableArrayToStringArray(types);
-			// 			intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-			// 		} else {
-			// 			Log.e(NAME, "Multiple type values not supported below API level 19");
-			// 		}
-			// 	} else if (types.size() == 1) {
-			// 		intent.setType(types.getString(0));
-			// 	}
-			// }
-
-			// boolean multiple = !args.isNull(OPTION_MULIPLE) && args.getBoolean(OPTION_MULIPLE);
-			// if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-			// 	intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple);
-			// }
-
-			// if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-			// 	intent = Intent.createChooser(intent, null);
-			// }
-
-			// currentActivity.startActivityForResult(intent, READ_REQUEST_CODE, Bundle.EMPTY);
-			boolean multiple = !args.isNull(OPTION_MULIPLE) && args.getBoolean(OPTION_MULIPLE);
-			int maxFilesCount = !args.isNull(OPTION_MAX_FILES_COUNT) ? args.getInt(OPTION_MAX_FILES_COUNT) : Extra.DEFAULT_FILES_COUNT;
-			long maxFileSize = !args.isNull(OPTION_MAX_FILE_SIZE) ? (long) args.getDouble(OPTION_MAX_FILE_SIZE) : Extra.DEFAULT_FILE_SIZE;
+			boolean multiple = args.hasKey(OPTION_MULIPLE) && args.getBoolean(OPTION_MULIPLE);
+			int maxFilesCount = args.hasKey(OPTION_MAX_FILES_COUNT) ? args.getInt(OPTION_MAX_FILES_COUNT) : Extra.DEFAULT_FILES_COUNT;
+			long maxFileSize = args.hasKey(OPTION_MAX_FILE_SIZE) ? (long) args.getDouble(OPTION_MAX_FILE_SIZE) : Extra.DEFAULT_FILE_SIZE;
 			FilePicker
 				.with(currentActivity)
 				.maxCount(maxFilesCount)
@@ -167,26 +138,11 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 
 			try {
 				WritableArray results = Arguments.createArray();
-
-				// if (uri != null) {
-				// 	results.pushMap(getMetadata(uri));
-				// } else if (clipData != null && clipData.getItemCount() > 0) {
-				// 	final int length = clipData.getItemCount();
-				// 	for (int i = 0; i < length; ++i) {
-				// 		ClipData.Item item = clipData.getItemAt(i);
-				// 		results.pushMap(getMetadata(item.getUri()));
-				// 	}
-				// } else {
-				// 	promise.reject(E_INVALID_DATA_RETURNED, "Invalid data returned by intent");
-				// 	return;
-				// }
-
 				if (data != null && data.hasExtra(Extra.DATA)) {
 					File[] array = new Gson().fromJson(data.getStringExtra(Extra.DATA), File[].class);
 					for (int i = 0; i < array.length; i++) {
 						results.pushMap(getMetadata(Uri.parse(array[i].getUrl())));
 					}
-					promise.resolve(results);
 				} else {
 					promise.reject(E_INVALID_DATA_RETURNED, "Invalid data returned by intent");
 					return;

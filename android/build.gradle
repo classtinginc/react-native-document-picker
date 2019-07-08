@@ -39,5 +39,5 @@ allprojects {
 
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    implementation 'com.github.classtinginc:android-file-picker:1.0.2'
+    implementation 'com.github.classtinginc:android-file-picker:1.0.9'
 }
