@@ -138,10 +138,11 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 
 			try {
 				WritableArray results = Arguments.createArray();
+				
 				if (data != null && data.hasExtra(Extra.DATA)) {
 					File[] array = new Gson().fromJson(data.getStringExtra(Extra.DATA), File[].class);
 					for (int i = 0; i < array.length; i++) {
-						results.pushMap(getMetadata(Uri.parse(array[i].getUrl())));
+						results.pushMap(getMetadata(array[i]));
 					}
 				} else {
 					promise.reject(E_INVALID_DATA_RETURNED, "Invalid data returned by intent");
@@ -156,42 +157,27 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 		}
 	}
 
-	private WritableMap getMetadata(Uri uri) {
+	private WritableMap getMetadata(File file) {
 		WritableMap map = Arguments.createMap();
 
-		map.putString(FIELD_URI, uri.toString());
+		map.putString(FIELD_URI, file.getUrl());
+		map.putString(FIELD_TYPE, getExtension(file.getUrl()));
+		map.putString(FIELD_NAME, file.getName());
+		map.putDouble(FIELD_SIZE, file.getSize());
+		return map;
+	}
 
-		ContentResolver contentResolver = getReactApplicationContext().getContentResolver();
-
-		map.putString(FIELD_TYPE, contentResolver.getType(uri));
-
-		Cursor cursor = contentResolver.query(uri, null, null, null, null, null);
-
-		try {
-			if (cursor != null && cursor.moveToFirst()) {
-				int displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-				if (!cursor.isNull(displayNameIndex)) {
-					map.putString(FIELD_NAME, cursor.getString(displayNameIndex));
-				}
-
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-					int mimeIndex = cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE);
-					if (!cursor.isNull(mimeIndex)) {
-						map.putString(FIELD_TYPE, cursor.getString(mimeIndex));
-					}
-				}
-
-				int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-				if (!cursor.isNull(sizeIndex)) {
-					map.putInt(FIELD_SIZE, cursor.getInt(sizeIndex));
-				}
-			}
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
+	public String getExtension(String uri) {
+		if (uri == null) {
+			return null;
 		}
 
-		return map;
+		int dot = uri.lastIndexOf(".");
+		if (dot >= 0) {
+			return uri.substring(dot).replace(".", "");
+		} else {
+			// No extension.
+			return "";
+		}
 	}
 }
