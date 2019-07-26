@@ -6,15 +6,12 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.provider.DocumentsContract;
-import android.provider.OpenableColumns;
 import com.classtinginc.file_picker.consts.Extra;
+import com.classtinginc.file_picker.consts.TranslationKey;
 import com.classtinginc.file_picker.model.File;
 import com.classtinginc.file_picker.FilePicker;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.google.gson.Gson;
 import android.webkit.MimeTypeMap;
 
@@ -29,6 +26,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+
+import java.util.HashMap;
 
 /**
  * @see <a href="https://developer.android.com/guide/topics/providers/document-provider.html">android documentation</a>
@@ -49,6 +48,7 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 	private static final String OPTION_MULIPLE = "multiple";
 	private static final String OPTION_MAX_FILES_COUNT = "maxFilesCount";
 	private static final String OPTION_MAX_FILE_SIZE = "maxFileSize";
+	private static final String OPTION_TRANSLATIONS = "translations";
 
 	private static final String FIELD_URI = "uri";
 	private static final String FIELD_NAME = "name";
@@ -109,13 +109,24 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 			boolean multiple = args.hasKey(OPTION_MULIPLE) && args.getBoolean(OPTION_MULIPLE);
 			int maxFilesCount = args.hasKey(OPTION_MAX_FILES_COUNT) ? args.getInt(OPTION_MAX_FILES_COUNT) : Extra.DEFAULT_FILES_COUNT;
 			long maxFileSize = args.hasKey(OPTION_MAX_FILE_SIZE) ? (long) args.getDouble(OPTION_MAX_FILE_SIZE) : Extra.DEFAULT_FILE_SIZE;
+			ReadableMap translations = args.hasKey(OPTION_TRANSLATIONS) ? args.getMap(OPTION_TRANSLATIONS) : null;
+			HashMap<TranslationKey, String> convertedTranslations = new HashMap<>();
+
+			if (translations != null) {
+				for (ReadableMapKeySetIterator it = translations.keySetIterator(); it.hasNextKey();) {
+					String key = it.nextKey();
+					convertedTranslations.put(TranslationKey.valueOf(key), translations.getString(key));
+				}
+			}
+
 			FilePicker
 				.with(currentActivity)
 				.maxCount(maxFilesCount)
 				.maxFileSize(maxFileSize)
-				// .translations(translations)
+			 	.translations(convertedTranslations)
 				.allowMultiple(multiple)
 				.startActivityForResult(READ_REQUEST_CODE);
+
 		} catch (ActivityNotFoundException e) {
 			this.promise.reject(E_UNABLE_TO_OPEN_FILE_TYPE, e.getLocalizedMessage());
 			this.promise = null;
