@@ -47,6 +47,7 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 	private static final String OPTION_TYPE = "type";
 	private static final String OPTION_MULIPLE = "multiple";
 	private static final String OPTION_MAX_FILES_COUNT = "maxFilesCount";
+	private static final String OPTION_AVAILABLE_FILES_COUNT = "availableFilesCount";
 	private static final String OPTION_MAX_FILE_SIZE = "maxFileSize";
 	private static final String OPTION_TRANSLATIONS = "translations";
 
@@ -108,6 +109,7 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 		try {
 			boolean multiple = args.hasKey(OPTION_MULIPLE) && args.getBoolean(OPTION_MULIPLE);
 			int maxFilesCount = args.hasKey(OPTION_MAX_FILES_COUNT) ? args.getInt(OPTION_MAX_FILES_COUNT) : Extra.DEFAULT_FILES_COUNT;
+			int availableFilesCount = args.hasKey(OPTION_AVAILABLE_FILES_COUNT) ? args.getInt(OPTION_AVAILABLE_FILES_COUNT) : Extra.DEFAULT_AVAILABLE_FILES_COUNT;
 			long maxFileSize = args.hasKey(OPTION_MAX_FILE_SIZE) ? (long) args.getDouble(OPTION_MAX_FILE_SIZE) : Extra.DEFAULT_FILE_SIZE;
 			ReadableMap translations = args.hasKey(OPTION_TRANSLATIONS) ? args.getMap(OPTION_TRANSLATIONS) : null;
 			HashMap<TranslationKey, String> convertedTranslations = new HashMap<>();
@@ -122,6 +124,7 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 			FilePicker
 				.with(currentActivity)
 				.maxCount(maxFilesCount)
+				.availableFilesCount(availableFilesCount)
 				.maxFileSize(maxFileSize)
 			 	.translations(convertedTranslations)
 				.allowMultiple(multiple)
