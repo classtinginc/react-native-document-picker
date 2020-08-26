@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import com.classtinginc.file_picker.consts.Extra;
 import com.classtinginc.file_picker.consts.TranslationKey;
@@ -207,11 +208,11 @@ public class DocumentPickerModule extends ReactContextBaseJavaModule {
 		map.putString(FIELD_TYPE, getMimeType(getCurrentActivity(), Uri.parse(uri)));
 		map.putString(FIELD_NAME, file.getName());
 		map.putDouble(FIELD_SIZE, file.getSize());
-		
+
 		map.putString(FIELD_FILE_COPY_URI, uri.toString());
 		ContentResolver contentResolver = getReactApplicationContext().getContentResolver();
-		map.putString(FIELD_FILE_TYPE, contentResolver.getType(uri));
-		try (Cursor cursor = contentResolver.query(uri, null, null, null, null, null)) {
+		map.putString(FIELD_FILE_TYPE, contentResolver.getType(Uri.parse(uri)));
+		try (Cursor cursor = contentResolver.query(Uri.parse(uri), null, null, null, null, null)) {
 			if (cursor != null && cursor.moveToFirst()) {
 				int displayNameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 				if (!cursor.isNull(displayNameIndex)) {
