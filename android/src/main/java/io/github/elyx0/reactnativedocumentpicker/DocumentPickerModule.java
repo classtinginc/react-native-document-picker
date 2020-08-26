@@ -13,7 +13,12 @@ import com.classtinginc.file_picker.model.File;
 import com.classtinginc.file_picker.FilePicker;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.google.gson.Gson;
+
+import android.provider.DocumentsContract;
+import android.provider.OpenableColumns;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
+import android.os.Build;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
